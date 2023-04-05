@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
-// import Announcement from "../components/Announcement";
+import AppAnnouncement from "../components/AppAnnouncement";
 import Products from "../components/Products";
 import NewsLetter from "../components/NewsLetter";
 import Footer from "../components/Footer";
@@ -39,6 +39,7 @@ const Option = styled.option``;
 const ProductList = () => {
   return (
     <Container>
+      <AppAnnouncement />
       <Navbar />
       <Title>Dresses</Title>
       <FilterContainer>
