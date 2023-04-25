@@ -5,6 +5,9 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import NewsLetter from "../components/NewsLetter";
 import { mobile } from "../responsive";
+import { useLocation } from "react-router-dom";
+import { publicRequest } from "../requestMethods";
+import { useEffect, useState } from "react";
 
 const Container = styled.div``;
 
@@ -116,39 +119,54 @@ const Button = styled.button`
 `;
 
 const Product = () => {
+
+  const location = useLocation();
+  const id = location.pathname.split("/")[2];
+  const [product, setProduct] = useState({});
+
+
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const res = await publicRequest.get("/products/find/" + id);
+        setProduct(res.data);
+        console.log('get product successful');
+        console.log(res.data);
+      } catch (error) {
+        console.log('get product error');
+        console.log(error);
+      }
+    };
+    getProduct();
+  }, [id]);
+
   return (
     <Container>
       <Navbar />
       <AppAnnouncement />
       <Wrapper>
         <ImgContainer>
-          <Image src="https://i.ibb.co/S6qMxwr/jean.jpg" />
+          <Image src={product.img} />
         </ImgContainer>
         <InfoContainer>
-          <Title>Denim Jumpsuit</Title>
+          <Title>{product.title}</Title>
           <Desc>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-            venenatis, dolor in finibus malesuada, lectus ipsum porta nunc, at
-            iaculis arcu nisi sed mauris. Nulla fermentum vestibulum ex, eget
-            tristique tortor pretium ut. Curabitur elit justo, consequat id
-            condimentum ac, volutpat ornare.
+            {product.desc}
           </Desc>
-          <Price>$ 20</Price>
+          <Price>$ {product.price}</Price>
           <FilterContainer>
             <Filter>
               <FilterTitle>Color</FilterTitle>
-              <FilterColor color="black" />
-              <FilterColor color="darkblue" />
-              <FilterColor color="gray" />
+              {product.color.map((singleColor) => (
+                <FilterColor color={singleColor} key={singleColor}/>
+              ))}
             </Filter>
             <Filter>
               <FilterTitle>Size</FilterTitle>
               <FilterSize>
-                <FilterSizeOption>XS</FilterSizeOption>
-                <FilterSizeOption>S</FilterSizeOption>
-                <FilterSizeOption>M</FilterSizeOption>
-                <FilterSizeOption>L</FilterSizeOption>
-                <FilterSizeOption>XL</FilterSizeOption>
+              {product.size.map((singleSize) => (
+                <FilterSizeOption key={singleSize} >{singleSize}</FilterSizeOption>
+              ))}
               </FilterSize>
             </Filter>
           </FilterContainer>
