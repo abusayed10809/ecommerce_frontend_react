@@ -8,6 +8,8 @@ import { mobile } from "../responsive";
 import { useLocation } from "react-router-dom";
 import { publicRequest } from "../requestMethods";
 import { useEffect, useState } from "react";
+import { addProduct } from "../redux/cartRedux"
+import { useDispatch } from "react-redux";
 
 const Container = styled.div``;
 
@@ -123,8 +125,13 @@ const Product = () => {
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const [product, setProduct] = useState({});
+  const [quantity, setQuantity] = useState(1);
+  const [color, setColor] = useState("");
+  const [size, setSize] = useState("");
+  const dispatch = useDispatch();
 
-
+  /// get single product 
+  /// id as request param
   useEffect(() => {
     const getProduct = async () => {
       try {
@@ -139,6 +146,25 @@ const Product = () => {
     };
     getProduct();
   }, [id]);
+
+  /// handle quantity change ----------------------------------------
+  const handleQuantity = (type) => {
+    if (type === "dec" && quantity > 1) {
+      setQuantity(quantity - 1);
+    } else if (type === "inc") {
+      setQuantity(quantity + 1);
+    }
+  }
+
+  /// handle add to cart ----------------------------------------
+  const handleAddToCart = () => {
+    dispatch(addProduct({ 
+      ...product,
+      quantity, 
+      color,
+      size,
+    }));
+  };
 
   return (
     <Container>
@@ -157,26 +183,26 @@ const Product = () => {
           <FilterContainer>
             <Filter>
               <FilterTitle>Color</FilterTitle>
-              {product.color.map((singleColor) => (
-                <FilterColor color={singleColor} key={singleColor}/>
+              {product.color?.map((singleColor) => (
+                <FilterColor color={singleColor} key={singleColor} onClick={() => setColor(singleColor)} />
               ))}
             </Filter>
             <Filter>
               <FilterTitle>Size</FilterTitle>
-              <FilterSize>
-              {product.size.map((singleSize) => (
-                <FilterSizeOption key={singleSize} >{singleSize}</FilterSizeOption>
-              ))}
+              <FilterSize onChange={(e) => setSize(e.target.value)} >
+                {product.size?.map((singleSize) => (
+                  <FilterSizeOption key={singleSize} >{singleSize}</FilterSizeOption>
+                ))}
               </FilterSize>
             </Filter>
           </FilterContainer>
           <AddContainer>
             <AmountContainer>
-              <Remove />
-              <Amount>1</Amount>
-              <Add />
+              <Remove onClick={() => handleQuantity("dec")} />
+              <Amount>{quantity}</Amount>
+              <Add onClick={() => handleQuantity("inc")} />
             </AmountContainer>
-            <Button>ADD TO CART</Button>
+            <Button onClick={handleAddToCart} >ADD TO CART</Button>
           </AddContainer>
         </InfoContainer>
       </Wrapper>
