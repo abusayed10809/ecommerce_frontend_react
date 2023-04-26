@@ -8,9 +8,10 @@ import Pay from "./components/Pay";
 import Success from "./components/Success";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function App() {
-  const user = true;
+  const user = useSelector((state) => state.user.currentUser);
   return (
     <>
       <Router>
