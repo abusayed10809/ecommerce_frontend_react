@@ -5,6 +5,13 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { mobile } from "../responsive";
 import { useSelector } from "react-redux";
+import StripeCheckout from "react-stripe-checkout";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { userRequest } from "../requestMethods";
+
+const KEY =
+  "pk_test_51MwZWrD4Mmtyc8EQGpsWNaDRQS2UHPDS9vajjTyxkHWrGTTw0BTKuZZLTcMrBqsxGcaSFKeddGtkO5bncEplIlSe00Be8ke9iu";
 
 const Container = styled.div``;
 
@@ -67,6 +74,9 @@ const ProductDetail = styled.div`
 
 const Image = styled.img`
   width: 200px;
+  height: 200px;
+  padding: 7px 0;
+  object-fit: cover;
 `;
 
 const Details = styled.div`
@@ -153,13 +163,49 @@ const Button = styled.button`
   font-weight: 600;
 `;
 
+/* 
+main cart function ------------------------------
+*/
 const Cart = () => {
 
+  const [stripeToken, setStripeToken] = useState(null);
+  const navigate = useNavigate();
+  
+  /// on token
+  const onToken = (token) => {
+    console.log(token);
+    setStripeToken(token);
+  };
+
+  /// use selector to fetch state from reducer
   const cart = useSelector(
     state => state.cart
   );
 
   console.log(cart);
+
+  /// make request for backend api after receiving stripe token
+  useEffect(() => {
+    const makeRequest = async () => {
+      try {
+        const res = await userRequest.post(
+          "/checkout/payment",
+          {
+            tokenId: stripeToken.id,
+            amount: cart.total * 100,
+          }
+        );
+
+        console.log(res);
+        navigate("/success", {data: res.data});
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    if (stripeToken != null) {
+      makeRequest();
+    }
+  }, [stripeToken, cart.total, navigate]);
 
   return (
     <Container>
@@ -220,7 +266,7 @@ const Cart = () => {
             <SummaryTitle>ORDER SUMMARY</SummaryTitle>
             <SummaryItem>
               <SummaryItemText>Subtotal</SummaryItemText>
-              <SummaryItemPrice>$ 80</SummaryItemPrice>
+              <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
             </SummaryItem>
             <SummaryItem>
               <SummaryItemText>Estimated Shipping</SummaryItemText>
@@ -232,9 +278,24 @@ const Cart = () => {
             </SummaryItem>
             <SummaryItem type="total">
               <SummaryItemText>Total</SummaryItemText>
-              <SummaryItemPrice>$ 80</SummaryItemPrice>
+              <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
             </SummaryItem>
-            <Button>CHECKOUT NOW</Button>
+
+
+
+            <StripeCheckout
+              name="Lama Shop"
+              image="https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U"
+              billingAddress
+              shippingAddress
+              description={`Your total is $${cart.total}`}
+              amount={cart.total * 100}
+              token={onToken}
+              stripeKey={KEY}
+            >
+              <Button>CHECKOUT NOW</Button>
+            </StripeCheckout>
+
           </Summary>
         </Bottom>
 
