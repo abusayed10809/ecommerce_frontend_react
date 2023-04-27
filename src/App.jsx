@@ -31,12 +31,6 @@ function App() {
       </Router>
     </>
   );
-  // return <Home />;
-  // return <ProductList />;
-  // return <Product />;
-  // return <Login />;
-  // return <Register />;
-  // return <Cart />;
 }
 
 export default App;
